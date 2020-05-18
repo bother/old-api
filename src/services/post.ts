@@ -13,7 +13,7 @@ import {
 
 @Service()
 export class PostService {
-  async nearby(coordinates: number[], offset = 0): Promise<Post[]> {
+  async nearby(coordinates: number[], offset: number): Promise<Post[]> {
     const posts = await PostModel.find({
       coordinates: {
         $geoWithin: {
@@ -31,7 +31,7 @@ export class PostService {
     return posts
   }
 
-  async popular(offset = 0): Promise<Post[]> {
+  async popular(offset: number): Promise<Post[]> {
     const posts = await PostModel.find({
       createdAt: {
         $gte: moment().subtract(24, 'hours').toDate()
@@ -49,7 +49,7 @@ export class PostService {
     return posts
   }
 
-  async latest(offset = 0): Promise<Post[]> {
+  async latest(offset: number): Promise<Post[]> {
     const posts = await PostModel.find()
       .sort({
         createdAt: -1
