@@ -22,3 +22,15 @@ export class Feed {
   @Field(() => [Post])
   latest!: Post[]
 }
+
+@ObjectType()
+export class Location {
+  @Field()
+  city!: string
+
+  @Field()
+  state!: string
+
+  @Field()
+  country!: string
+}

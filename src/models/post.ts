@@ -9,6 +9,7 @@ import {
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, Float, ID, Int, ObjectType } from 'type-graphql'
 
+import { Location } from '../types/graphql'
 import { Comment } from './comment'
 import { User } from './user'
 
@@ -41,6 +42,12 @@ export class Post extends TimeStamps {
     required: true
   })
   coordinates!: [number]
+
+  @Field(() => Location)
+  @prop({
+    required: true
+  })
+  location!: Location
 
   @Field(() => Int)
   @prop({
