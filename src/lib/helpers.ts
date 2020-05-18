@@ -1,11 +1,11 @@
 import { Ref } from '@typegoose/typegoose'
 import { ObjectId } from 'bson'
 
-import { User } from '../models'
+import { Post, User } from '../models'
 
 class Helpers {
-  equals(id: string, user: Ref<User>): boolean {
-    return ObjectId.createFromHexString(id).equals(user as ObjectId)
+  equals(id: string, ref: Ref<Post | User>): boolean {
+    return ObjectId.createFromHexString(id).equals(ref as ObjectId)
   }
 }
 

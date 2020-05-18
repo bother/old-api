@@ -80,6 +80,9 @@ export class Post extends TimeStamps {
 
   @Field()
   updatedAt!: Date
+
+  @Field()
+  liked!: boolean
 }
 
 export const PostModel = getModelForClass(Post)

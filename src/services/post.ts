@@ -2,7 +2,7 @@ import moment from 'moment'
 import { MongooseFilterQuery } from 'mongoose'
 import { Service } from 'typedi'
 
-import { google } from '../lib'
+import { google, helpers } from '../lib'
 import {
   Comment,
   CommentModel,
@@ -36,6 +36,8 @@ export class PostService {
       .populate('user')
       .limit(100)
 
+    await this.fetchLikes(posts)
+
     return posts
   }
 
@@ -54,12 +56,14 @@ export class PostService {
 
     const posts = await PostModel.find(query)
       .sort({
-        likes: 1,
+        likes: -1,
         // eslint-disable-next-line sort-keys-fix/sort-keys-fix
         createdAt: -1
       })
       .populate('user')
       .limit(100)
+
+    await this.fetchLikes(posts)
 
     return posts
   }
@@ -79,6 +83,8 @@ export class PostService {
       })
       .populate('user')
       .limit(100)
+
+    await this.fetchLikes(posts)
 
     return posts
   }
@@ -170,5 +176,21 @@ export class PostService {
     })
 
     return likes
+  }
+
+  private async fetchLikes(posts: Post[]): Promise<Post[]> {
+    const likes = await LikeModel.find({
+      post: {
+        $in: posts.map(({ id }) => id)
+      }
+    })
+
+    return posts.map((post) => {
+      const like = likes.find((like) => helpers.equals(post.id, like.post))
+
+      post.liked = !!like
+
+      return post
+    })
   }
 }
