@@ -19,12 +19,12 @@ export class PostResolver {
   @Query(() => Feed)
   @Authorized()
   feed(
-    @Arg('location', () => [Float], {
+    @Arg('coordinates', () => [Float], {
       nullable: true
     })
-    location?: number[]
+    coordinates?: number[]
   ): Promise<Feed> {
-    return this.service.feed(location)
+    return this.service.feed(coordinates)
   }
 
   @Mutation(() => Post)
@@ -32,9 +32,9 @@ export class PostResolver {
   createPost(
     @Ctx('user') user: User,
     @Arg('body') body: string,
-    @Arg('location', () => [Float]) location: number[]
+    @Arg('coordinates', () => [Float]) coordinates: number[]
   ): Promise<Post> {
-    return this.service.createPost(user, body, location)
+    return this.service.createPost(user, body, coordinates)
   }
 
   @Query(() => Post)

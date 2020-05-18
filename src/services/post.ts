@@ -13,7 +13,7 @@ import { Feed } from '../types/graphql'
 
 @Service()
 export class PostService {
-  async feed(location?: number[]): Promise<Feed> {
+  async feed(coordinates?: number[]): Promise<Feed> {
     const latest = await PostModel.find()
       .sort({
         createdAt: -1
@@ -34,11 +34,11 @@ export class PostService {
       .populate('user')
       .limit(100)
 
-    const nearby = location
+    const nearby = coordinates
       ? await PostModel.find({
-          location: {
+          coordinates: {
             $geoWithin: {
-              $center: [location, 50]
+              $center: [coordinates, 50]
             }
           }
         })
@@ -59,11 +59,11 @@ export class PostService {
   async createPost(
     user: User,
     body: string,
-    location: number[]
+    coordinates: number[]
   ): Promise<Post> {
     const post = await PostModel.create({
       body,
-      location,
+      coordinates,
       user
     })
 

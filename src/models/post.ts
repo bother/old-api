@@ -23,7 +23,7 @@ import { User } from './user'
   user: 1
 })
 @index({
-  location: '2d'
+  coordinates: '2d'
 })
 export class Post extends TimeStamps {
   @Field(() => ID)
@@ -40,7 +40,7 @@ export class Post extends TimeStamps {
     items: Number,
     required: true
   })
-  location!: [number]
+  coordinates!: [number]
 
   @Field(() => Int)
   @prop({
