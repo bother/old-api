@@ -3,6 +3,7 @@ import {
   Authorized,
   Ctx,
   Float,
+  Int,
   Mutation,
   Query,
   Resolver
@@ -66,9 +67,9 @@ export class PostResolver {
     return this.service.fetchPost(id)
   }
 
-  @Query(() => Boolean)
+  @Query(() => Int)
   @Authorized()
-  likePost(@Ctx('user') user: User, @Arg('id') id: string): Promise<boolean> {
+  likePost(@Ctx('user') user: User, @Arg('id') id: string): Promise<number> {
     return this.service.likePost(user, id)
   }
 

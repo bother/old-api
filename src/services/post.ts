@@ -100,7 +100,7 @@ export class PostService {
     return post
   }
 
-  async likePost(user: User, post: string): Promise<boolean> {
+  async likePost(user: User, post: string): Promise<number> {
     const like = await LikeModel.findOne({
       post,
       user
@@ -109,9 +109,9 @@ export class PostService {
     if (like) {
       await LikeModel.findByIdAndDelete(like.id)
 
-      await this.updateLikes(post)
+      const likes = await this.updateLikes(post)
 
-      return false
+      return likes
     }
 
     await LikeModel.create({
@@ -119,9 +119,9 @@ export class PostService {
       user
     })
 
-    await this.updateLikes(post)
+    const likes = await this.updateLikes(post)
 
-    return true
+    return likes
   }
 
   async createComment(
@@ -138,7 +138,7 @@ export class PostService {
     return comment
   }
 
-  private async updateLikes(post: string): Promise<void> {
+  private async updateLikes(post: string): Promise<number> {
     const likes = await LikeModel.countDocuments({
       post
     })
@@ -146,5 +146,7 @@ export class PostService {
     await PostModel.findByIdAndUpdate(post, {
       likes
     })
+
+    return likes
   }
 }
