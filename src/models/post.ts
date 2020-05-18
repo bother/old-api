@@ -7,7 +7,7 @@ import {
   Ref
 } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
-import { Field, Float, ID, Int, ObjectType } from 'type-graphql'
+import { Field, ID, Int, ObjectType } from 'type-graphql'
 
 import { Location } from '../types/graphql'
 import { Comment } from './comment'
@@ -36,7 +36,6 @@ export class Post extends TimeStamps {
   })
   body!: string
 
-  @Field(() => [Float])
   @prop({
     items: Number,
     required: true
@@ -45,6 +44,7 @@ export class Post extends TimeStamps {
 
   @Field(() => Location)
   @prop({
+    _id: false,
     required: true
   })
   location!: Location

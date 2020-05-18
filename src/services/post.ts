@@ -1,6 +1,7 @@
 import moment from 'moment'
 import { Service } from 'typedi'
 
+import { google } from '../lib'
 import {
   Comment,
   CommentModel,
@@ -61,9 +62,12 @@ export class PostService {
     body: string,
     coordinates: number[]
   ): Promise<Post> {
+    const location = await google.geocode(coordinates)
+
     const post = await PostModel.create({
       body,
       coordinates,
+      location,
       user
     })
 
