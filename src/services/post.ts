@@ -10,19 +10,29 @@ import {
   PostModel,
   User
 } from '../models'
-import { Feed } from '../types/graphql'
 
 @Service()
 export class PostService {
-  async feed(coordinates?: number[]): Promise<Feed> {
-    const latest = await PostModel.find()
+  async nearby(coordinates: number[], offset = 0): Promise<Post[]> {
+    const posts = await PostModel.find({
+      coordinates: {
+        $geoWithin: {
+          $center: [coordinates, 50]
+        }
+      }
+    })
       .sort({
         createdAt: -1
       })
       .populate('user')
+      .skip(offset)
       .limit(100)
 
-    const popular = await PostModel.find({
+    return posts
+  }
+
+  async popular(offset = 0): Promise<Post[]> {
+    const posts = await PostModel.find({
       createdAt: {
         $gte: moment().subtract(24, 'hours').toDate()
       }
@@ -33,28 +43,22 @@ export class PostService {
         createdAt: -1
       })
       .populate('user')
+      .skip(offset)
       .limit(100)
 
-    const nearby = coordinates
-      ? await PostModel.find({
-          coordinates: {
-            $geoWithin: {
-              $center: [coordinates, 50]
-            }
-          }
-        })
-          .sort({
-            createdAt: -1
-          })
-          .populate('user')
-          .limit(100)
-      : []
+    return posts
+  }
 
-    return {
-      latest,
-      nearby,
-      popular
-    }
+  async latest(offset = 0): Promise<Post[]> {
+    const posts = await PostModel.find()
+      .sort({
+        createdAt: -1
+      })
+      .populate('user')
+      .skip(offset)
+      .limit(100)
+
+    return posts
   }
 
   async createPost(

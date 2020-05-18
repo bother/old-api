@@ -10,21 +10,44 @@ import {
 
 import { Comment, Post, User } from '../models'
 import { PostService } from '../services'
-import { Feed } from '../types/graphql'
 
 @Resolver()
 export class PostResolver {
   constructor(private readonly service: PostService) {}
 
-  @Query(() => Feed)
+  @Query(() => [Post])
   @Authorized()
-  feed(
-    @Arg('coordinates', () => [Float], {
-      nullable: true
+  nearby(
+    @Arg('coordinates', () => [Float])
+    coordinates: number[],
+    @Arg('offset', {
+      defaultValue: 0
     })
-    coordinates?: number[]
-  ): Promise<Feed> {
-    return this.service.feed(coordinates)
+    offset: number
+  ): Promise<Post[]> {
+    return this.service.nearby(coordinates, offset)
+  }
+
+  @Query(() => [Post])
+  @Authorized()
+  latest(
+    @Arg('offset', {
+      defaultValue: 0
+    })
+    offset: number
+  ): Promise<Post[]> {
+    return this.service.latest(offset)
+  }
+
+  @Query(() => [Post])
+  @Authorized()
+  popular(
+    @Arg('offset', {
+      defaultValue: 0
+    })
+    offset: number
+  ): Promise<Post[]> {
+    return this.service.popular(offset)
   }
 
   @Mutation(() => Post)
