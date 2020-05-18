@@ -1,4 +1,5 @@
 import moment from 'moment'
+import { MongooseFilterQuery } from 'mongoose'
 import { Service } from 'typedi'
 
 import { google } from '../lib'
@@ -13,49 +14,70 @@ import {
 
 @Service()
 export class PostService {
-  async nearby(coordinates: number[], offset: number): Promise<Post[]> {
-    const posts = await PostModel.find({
+  async nearby(coordinates: number[], after?: string): Promise<Post[]> {
+    const query: MongooseFilterQuery<Post> = {
       coordinates: {
         $geoWithin: {
           $center: [coordinates, 50]
         }
       }
-    })
+    }
+
+    if (after) {
+      query._id = {
+        $lt: after
+      }
+    }
+
+    const posts = await PostModel.find(query)
       .sort({
         createdAt: -1
       })
       .populate('user')
-      .skip(offset)
       .limit(100)
 
     return posts
   }
 
-  async popular(offset: number): Promise<Post[]> {
-    const posts = await PostModel.find({
+  async popular(after?: string): Promise<Post[]> {
+    const query: MongooseFilterQuery<Post> = {
       createdAt: {
         $gte: moment().subtract(24, 'hours').toDate()
       }
-    })
+    }
+
+    if (after) {
+      query._id = {
+        $lt: after
+      }
+    }
+
+    const posts = await PostModel.find(query)
       .sort({
         likes: 1,
         // eslint-disable-next-line sort-keys-fix/sort-keys-fix
         createdAt: -1
       })
       .populate('user')
-      .skip(offset)
       .limit(100)
 
     return posts
   }
 
-  async latest(offset: number): Promise<Post[]> {
-    const posts = await PostModel.find()
+  async latest(after?: string): Promise<Post[]> {
+    const query: MongooseFilterQuery<Post> = {}
+
+    if (after) {
+      query._id = {
+        $lt: after
+      }
+    }
+
+    const posts = await PostModel.find(query)
       .sort({
         createdAt: -1
       })
       .populate('user')
-      .skip(offset)
       .limit(100)
 
     return posts

@@ -21,34 +21,34 @@ export class PostResolver {
   nearby(
     @Arg('coordinates', () => [Float])
     coordinates: number[],
-    @Arg('offset', {
-      defaultValue: 0
+    @Arg('before', {
+      nullable: true
     })
-    offset: number
+    before?: string
   ): Promise<Post[]> {
-    return this.service.nearby(coordinates, offset)
+    return this.service.nearby(coordinates, before)
   }
 
   @Query(() => [Post])
   @Authorized()
   latest(
-    @Arg('offset', {
-      defaultValue: 0
+    @Arg('before', {
+      nullable: true
     })
-    offset: number
+    before?: string
   ): Promise<Post[]> {
-    return this.service.latest(offset)
+    return this.service.latest(before)
   }
 
   @Query(() => [Post])
   @Authorized()
   popular(
-    @Arg('offset', {
-      defaultValue: 0
+    @Arg('before', {
+      nullable: true
     })
-    offset: number
+    before?: string
   ): Promise<Post[]> {
-    return this.service.popular(offset)
+    return this.service.popular(before)
   }
 
   @Mutation(() => Post)
