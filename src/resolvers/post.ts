@@ -3,7 +3,6 @@ import {
   Authorized,
   Ctx,
   Float,
-  Int,
   Mutation,
   Query,
   Resolver
@@ -11,6 +10,7 @@ import {
 
 import { Comment, Post, User } from '../models'
 import { PostService } from '../services'
+import { LikeResult } from '../types/graphql'
 
 @Resolver()
 export class PostResolver {
@@ -58,14 +58,17 @@ export class PostResolver {
 
   @Query(() => Post)
   @Authorized()
-  fetchPost(@Arg('id') id: string): Promise<Post> {
-    return this.service.fetchPost(id)
+  fetchPost(@Ctx('user') user: User, @Arg('id') id: string): Promise<Post> {
+    return this.service.fetch(user, id)
   }
 
-  @Mutation(() => Int)
+  @Mutation(() => LikeResult)
   @Authorized()
-  likePost(@Ctx('user') user: User, @Arg('id') id: string): Promise<number> {
-    return this.service.likePost(user, id)
+  likePost(
+    @Ctx('user') user: User,
+    @Arg('id') id: string
+  ): Promise<LikeResult> {
+    return this.service.like(user, id)
   }
 
   @Mutation(() => Comment)
@@ -75,6 +78,6 @@ export class PostResolver {
     @Arg('postId') postId: string,
     @Arg('body') body: string
   ): Promise<Comment> {
-    return this.service.createComment(user, postId, body)
+    return this.service.comment(user, postId, body)
   }
 }

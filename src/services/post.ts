@@ -11,6 +11,7 @@ import {
   PostModel,
   User
 } from '../models'
+import { LikeResult } from '../types/graphql'
 
 @Service()
 export class PostService {
@@ -106,7 +107,7 @@ export class PostService {
     return post
   }
 
-  async fetchPost(id: string): Promise<Post> {
+  async fetch(user: User, id: string): Promise<Post> {
     const post = await PostModel.findById(id)
       .populate({
         path: 'comments',
@@ -120,10 +121,17 @@ export class PostService {
       throw new Error('Post not found')
     }
 
+    const like = await LikeModel.findOne({
+      post,
+      user
+    })
+
+    post.liked = !!like
+
     return post
   }
 
-  async likePost(user: User, post: string): Promise<number> {
+  async like(user: User, post: string): Promise<LikeResult> {
     const like = await LikeModel.findOne({
       post,
       user
@@ -134,7 +142,10 @@ export class PostService {
 
       const likes = await this.updateLikes(post)
 
-      return likes
+      return {
+        liked: false,
+        likes
+      }
     }
 
     await LikeModel.create({
@@ -144,14 +155,13 @@ export class PostService {
 
     const likes = await this.updateLikes(post)
 
-    return likes
+    return {
+      liked: true,
+      likes
+    }
   }
 
-  async createComment(
-    user: User,
-    post: string,
-    body: string
-  ): Promise<Comment> {
+  async comment(user: User, post: string, body: string): Promise<Comment> {
     const comment = await CommentModel.create({
       body,
       post,

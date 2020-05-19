@@ -13,6 +13,15 @@ export class AuthResult {
 }
 
 @ObjectType()
+export class LikeResult {
+  @Field()
+  liked!: boolean
+
+  @Field()
+  likes!: number
+}
+
+@ObjectType()
 export class Location {
   @Field()
   @prop()
