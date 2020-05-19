@@ -11,7 +11,6 @@ import {
   PostModel,
   User
 } from '../models'
-import { LikeResult } from '../types/graphql'
 
 @Service()
 export class PostService {
@@ -131,7 +130,13 @@ export class PostService {
     return post
   }
 
-  async like(user: User, post: string): Promise<LikeResult> {
+  async like(user: User, id: string): Promise<Post> {
+    const post = await PostModel.findById(id)
+
+    if (!post) {
+      throw new Error('Post not found')
+    }
+
     const like = await LikeModel.findOne({
       post,
       user
@@ -140,12 +145,12 @@ export class PostService {
     if (like) {
       await LikeModel.findByIdAndDelete(like.id)
 
-      const likes = await this.updateLikes(post)
+      const likes = await this.updateLikes(id)
 
-      return {
-        liked: false,
-        likes
-      }
+      post.liked = false
+      post.likes = likes
+
+      return post
     }
 
     await LikeModel.create({
@@ -153,12 +158,12 @@ export class PostService {
       user
     })
 
-    const likes = await this.updateLikes(post)
+    const likes = await this.updateLikes(id)
 
-    return {
-      liked: true,
-      likes
-    }
+    post.liked = true
+    post.likes = likes
+
+    return post
   }
 
   async comment(user: User, post: string, body: string): Promise<Comment> {

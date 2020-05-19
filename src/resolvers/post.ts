@@ -10,9 +10,8 @@ import {
 
 import { Comment, Post, User } from '../models'
 import { PostService } from '../services'
-import { LikeResult } from '../types/graphql'
 
-@Resolver()
+@Resolver(() => Post)
 export class PostResolver {
   constructor(private readonly service: PostService) {}
 
@@ -62,12 +61,9 @@ export class PostResolver {
     return this.service.fetch(user, id)
   }
 
-  @Mutation(() => LikeResult)
+  @Mutation(() => Post)
   @Authorized()
-  likePost(
-    @Ctx('user') user: User,
-    @Arg('id') id: string
-  ): Promise<LikeResult> {
+  likePost(@Ctx('user') user: User, @Arg('id') id: string): Promise<Post> {
     return this.service.like(user, id)
   }
 
