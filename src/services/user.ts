@@ -9,8 +9,6 @@ export class UserService {
   async signUp(): Promise<AuthResult> {
     const user = await UserModel.create({})
 
-    console.log('user', user)
-
     const token = auth.createToken(user)
 
     return {
