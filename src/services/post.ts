@@ -45,6 +45,9 @@ export class PostService {
     const posts = await PostModel.find({
       createdAt: {
         $gte: moment().subtract(24, 'hours').toDate()
+      },
+      likes: {
+        $gte: 100
       }
     })
       .sort({
