@@ -62,13 +62,13 @@ export class PostResolver {
     return this.service.fetchPost(id)
   }
 
-  @Query(() => Int)
+  @Mutation(() => Int)
   @Authorized()
   likePost(@Ctx('user') user: User, @Arg('id') id: string): Promise<number> {
     return this.service.likePost(user, id)
   }
 
-  @Query(() => Comment)
+  @Mutation(() => Comment)
   @Authorized()
   createComment(
     @Ctx('user') user: User,
