@@ -24,8 +24,8 @@ export class PostService {
     }
 
     if (after) {
-      query._id = {
-        $lt: after
+      query.createdAt = {
+        $lt: moment(after).toDate()
       }
     }
 
@@ -49,8 +49,8 @@ export class PostService {
     }
 
     if (after) {
-      query._id = {
-        $lt: after
+      query.createdAt = {
+        $lt: moment(after).toDate()
       }
     }
 
@@ -72,8 +72,8 @@ export class PostService {
     const query: MongooseFilterQuery<Post> = {}
 
     if (after) {
-      query._id = {
-        $lt: after
+      query.createdAt = {
+        $lt: moment(after).toDate()
       }
     }
 
