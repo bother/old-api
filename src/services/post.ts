@@ -41,20 +41,12 @@ export class PostService {
     return posts
   }
 
-  async popular(after?: string): Promise<Post[]> {
-    const query: MongooseFilterQuery<Post> = {
+  async popular(): Promise<Post[]> {
+    const posts = await PostModel.find({
       createdAt: {
         $gte: moment().subtract(24, 'hours').toDate()
       }
-    }
-
-    if (after) {
-      query.createdAt = {
-        $lt: moment(after).toDate()
-      }
-    }
-
-    const posts = await PostModel.find(query)
+    })
       .sort({
         likes: -1,
         // eslint-disable-next-line sort-keys-fix/sort-keys-fix

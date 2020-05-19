@@ -42,13 +42,8 @@ export class PostResolver {
 
   @Query(() => [Post])
   @Authorized()
-  popular(
-    @Arg('before', {
-      nullable: true
-    })
-    before?: string
-  ): Promise<Post[]> {
-    return this.service.popular(before)
+  popular(): Promise<Post[]> {
+    return this.service.popular()
   }
 
   @Mutation(() => Post)
