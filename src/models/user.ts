@@ -19,7 +19,6 @@ export class User extends TimeStamps {
   @Field(() => ID)
   id!: string
 
-  @Field(() => [ID])
   @arrayProp({
     default: [],
     ref: 'Post'

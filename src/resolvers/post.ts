@@ -8,7 +8,7 @@ import {
   Resolver
 } from 'type-graphql'
 
-import { Comment, Post, User } from '../models'
+import { Post, User } from '../models'
 import { PostService } from '../services'
 
 @Resolver(() => Post)
@@ -65,15 +65,5 @@ export class PostResolver {
   @Authorized()
   likePost(@Ctx('user') user: User, @Arg('id') id: string): Promise<Post> {
     return this.service.like(user, id)
-  }
-
-  @Mutation(() => Comment)
-  @Authorized()
-  createComment(
-    @Ctx('user') user: User,
-    @Arg('postId') postId: string,
-    @Arg('body') body: string
-  ): Promise<Comment> {
-    return this.service.comment(user, postId, body)
   }
 }

@@ -1,5 +1,4 @@
 import {
-  arrayProp,
   getModelForClass,
   index,
   modelOptions,
@@ -10,7 +9,6 @@ import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ID, Int, ObjectType } from 'type-graphql'
 
 import { Location } from '../types/graphql'
-import { Comment } from './comment'
 import { User } from './user'
 
 @ObjectType()
@@ -55,18 +53,11 @@ export class Post extends TimeStamps {
   })
   likes!: number
 
-  @Field(() => [Comment])
-  @arrayProp({
-    foreignField: 'post',
-    localField: '_id',
-    options: {
-      sort: {
-        createdAt: 1
-      }
-    },
-    ref: 'Comment'
+  @Field(() => Int)
+  @prop({
+    default: 0
   })
-  comments!: Ref<Comment>[]
+  comments!: number
 
   @Field(() => User)
   @prop({

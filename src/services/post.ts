@@ -3,14 +3,7 @@ import { MongooseFilterQuery } from 'mongoose'
 import { Service } from 'typedi'
 
 import { google, helpers } from '../lib'
-import {
-  Comment,
-  CommentModel,
-  LikeModel,
-  Post,
-  PostModel,
-  User
-} from '../models'
+import { LikeModel, Post, PostModel, User } from '../models'
 
 @Service()
 export class PostService {
@@ -107,14 +100,7 @@ export class PostService {
   }
 
   async fetch(user: User, id: string): Promise<Post> {
-    const post = await PostModel.findById(id)
-      .populate({
-        path: 'comments',
-        populate: {
-          path: 'user'
-        }
-      })
-      .populate('user')
+    const post = await PostModel.findById(id).populate('user')
 
     if (!post) {
       throw new Error('Post not found')
@@ -164,16 +150,6 @@ export class PostService {
     post.likes = likes
 
     return post
-  }
-
-  async comment(user: User, post: string, body: string): Promise<Comment> {
-    const comment = await CommentModel.create({
-      body,
-      post,
-      user
-    })
-
-    return comment
   }
 
   private async updateLikes(post: string): Promise<number> {
