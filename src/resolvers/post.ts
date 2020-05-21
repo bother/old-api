@@ -3,6 +3,7 @@ import {
   Authorized,
   Ctx,
   Float,
+  Int,
   Mutation,
   Query,
   Resolver
@@ -21,12 +22,14 @@ export class PostResolver {
     @Ctx('user') user: User,
     @Arg('coordinates', () => [Float])
     coordinates: number[],
+    @Arg('distance', () => Int)
+    distance: number,
     @Arg('before', {
       nullable: true
     })
     before?: string
   ): Promise<Post[]> {
-    return this.service.nearby(user, coordinates, before)
+    return this.service.nearby(user, coordinates, distance, before)
   }
 
   @Query(() => [Post])

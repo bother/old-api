@@ -10,6 +10,7 @@ export class PostService {
   async nearby(
     user: User,
     coordinates: number[],
+    distance: number,
     after?: string
   ): Promise<Post[]> {
     const query: MongooseFilterQuery<Post> = {
@@ -19,7 +20,7 @@ export class PostService {
             coordinates,
             type: 'Point'
           },
-          $maxDistance: 50 * 1000
+          $maxDistance: distance * 1000
         }
       }
     }
