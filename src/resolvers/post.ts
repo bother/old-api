@@ -18,6 +18,7 @@ export class PostResolver {
   @Query(() => [Post])
   @Authorized()
   nearby(
+    @Ctx('user') user: User,
     @Arg('coordinates', () => [Float])
     coordinates: number[],
     @Arg('before', {
@@ -25,24 +26,25 @@ export class PostResolver {
     })
     before?: string
   ): Promise<Post[]> {
-    return this.service.nearby(coordinates, before)
+    return this.service.nearby(user, coordinates, before)
   }
 
   @Query(() => [Post])
   @Authorized()
   latest(
+    @Ctx('user') user: User,
     @Arg('before', {
       nullable: true
     })
     before?: string
   ): Promise<Post[]> {
-    return this.service.latest(before)
+    return this.service.latest(user, before)
   }
 
   @Query(() => [Post])
   @Authorized()
-  popular(): Promise<Post[]> {
-    return this.service.popular()
+  popular(@Ctx('user') user: User): Promise<Post[]> {
+    return this.service.popular(user)
   }
 
   @Mutation(() => Post)

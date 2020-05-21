@@ -7,7 +7,11 @@ import { LikeModel, Post, PostModel, User } from '../models'
 
 @Service()
 export class PostService {
-  async nearby(coordinates: number[], after?: string): Promise<Post[]> {
+  async nearby(
+    user: User,
+    coordinates: number[],
+    after?: string
+  ): Promise<Post[]> {
     const query: MongooseFilterQuery<Post> = {
       coordinates: {
         $geoWithin: {
@@ -29,12 +33,12 @@ export class PostService {
       .populate('user')
       .limit(100)
 
-    await this.fetchLikes(posts)
+    await this.fetchLikes(user, posts)
 
     return posts
   }
 
-  async popular(): Promise<Post[]> {
+  async popular(user: User): Promise<Post[]> {
     const posts = await PostModel.find({
       createdAt: {
         $gte: moment().subtract(24, 'hours').toDate()
@@ -51,12 +55,12 @@ export class PostService {
       .populate('user')
       .limit(100)
 
-    await this.fetchLikes(posts)
+    await this.fetchLikes(user, posts)
 
     return posts
   }
 
-  async latest(after?: string): Promise<Post[]> {
+  async latest(user: User, after?: string): Promise<Post[]> {
     const query: MongooseFilterQuery<Post> = {}
 
     if (after) {
@@ -72,7 +76,7 @@ export class PostService {
       .populate('user')
       .limit(100)
 
-    await this.fetchLikes(posts)
+    await this.fetchLikes(user, posts)
 
     return posts
   }
@@ -164,19 +168,18 @@ export class PostService {
     return likes
   }
 
-  private async fetchLikes(posts: Post[]): Promise<Post[]> {
+  private async fetchLikes(user: User, posts: Post[]): Promise<Post[]> {
     const likes = await LikeModel.find({
       post: {
         $in: posts.map(({ id }) => id)
-      }
+      },
+      user
     })
 
-    return posts.map((post) => {
-      const like = likes.find((like) => helpers.equals(post.id, like.post))
-
-      post.liked = !!like
-
-      return post
+    posts.forEach((post) => {
+      post.liked = !!likes.find((like) => helpers.equals(post.id, like.post))
     })
+
+    return posts
   }
 }
