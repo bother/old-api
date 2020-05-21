@@ -18,9 +18,11 @@ export class Location {
   @prop()
   city!: string
 
-  @Field()
+  @Field({
+    nullable: true
+  })
   @prop()
-  state!: string
+  state?: string
 
   @Field()
   @prop()

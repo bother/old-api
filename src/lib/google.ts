@@ -32,8 +32,7 @@ class Google {
 
     return {
       city: 'Unknown',
-      country: 'Unknown',
-      state: 'Unknown'
+      country: 'Unknown'
     }
   }
 
@@ -74,8 +73,8 @@ class Google {
       if (city && state && country) {
         return {
           city: city.long_name,
-          country: country.long_name,
-          state: state.long_name
+          country: country.short_name,
+          state: state.short_name
         }
       }
     }
@@ -83,51 +82,9 @@ class Google {
     return {
       city: _city ?? 'Unknown',
       country: _country ?? 'Unknown',
-      state: _state ?? 'Unknown'
+      state: _state
     }
   }
 }
 
 export const google = new Google()
-// {
-//     "plus_code": {
-//       "compound_code": "347G+HJ Dubai - United Arab Emirates",
-//       "global_code": "7HQQ347G+HJ"
-//     },
-//     "results": [
-//       {
-//         "access_points": [],
-//         "address_components": [
-//           {
-//             "long_name": "دبي",
-//             "short_name": "دبي",
-//             "types": [
-//               "locality",
-//               "political"
-//             ]
-//           },
-//           {
-//             "long_name": "جبل علي 2",
-//             "short_name": "جبل علي 2",
-//             "types": [
-//               "neighborhood",
-//               "political"
-//             ]
-//           },
-//           {
-//             "long_name": "دبي",
-//             "short_name": "دبي",
-//             "types": [
-//               "administrative_area_level_1",
-//               "political"
-//             ]
-//           },
-//           {
-//             "long_name": "United Arab Emirates",
-//             "short_name": "AE",
-//             "types": [
-//               "country",
-//               "political"
-//             ]
-//           }
-//         ],

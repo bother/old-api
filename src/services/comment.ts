@@ -7,7 +7,7 @@ export class CommentService {
   async fetch(post: string): Promise<Comment[]> {
     return CommentModel.find({
       post
-    })
+    }).populate('user')
   }
 
   async create(user: User, post: string, body: string): Promise<Comment> {
