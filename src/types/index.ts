@@ -7,3 +7,8 @@ export type AuthToken = {
 export type Context = {
   user?: User
 }
+
+export type Coordinates = {
+  type: 'Point'
+  coordinates: number[]
+}

@@ -29,7 +29,7 @@ const main = async (): Promise<void> => {
           _id: ObjectId.createPk(),
           body: chance().paragraph(),
           comments: random(0, 10),
-          coordinates: city.loc.coordinates,
+          coordinates: city.loc,
           createdAt: time,
           likes: random(0, 111),
           location: {

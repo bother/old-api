@@ -14,8 +14,12 @@ export class PostService {
   ): Promise<Post[]> {
     const query: MongooseFilterQuery<Post> = {
       coordinates: {
-        $geoWithin: {
-          $center: [coordinates, 50]
+        $near: {
+          $geometry: {
+            coordinates,
+            type: 'Point'
+          },
+          $maxDistance: 50 * 1000
         }
       }
     }
@@ -90,7 +94,10 @@ export class PostService {
 
     const post = await PostModel.create({
       body,
-      coordinates,
+      coordinates: {
+        coordinates,
+        type: 'Point'
+      },
       location,
       user
     })

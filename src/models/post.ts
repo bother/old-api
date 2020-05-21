@@ -8,6 +8,7 @@ import {
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ID, Int, ObjectType } from 'type-graphql'
 
+import { Coordinates } from '../types'
 import { Location } from '../types/graphql'
 import { User } from './user'
 
@@ -22,7 +23,7 @@ import { User } from './user'
   user: 1
 })
 @index({
-  coordinates: '2d'
+  coordinates: '2dsphere'
 })
 export class Post extends TimeStamps {
   @Field(() => ID)
@@ -35,10 +36,9 @@ export class Post extends TimeStamps {
   body!: string
 
   @prop({
-    items: Number,
     required: true
   })
-  coordinates!: [number]
+  coordinates!: Coordinates
 
   @Field(() => Location)
   @prop({
