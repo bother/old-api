@@ -57,13 +57,23 @@ export class PostResolver {
     @Arg('body') body: string,
     @Arg('coordinates', () => [Float]) coordinates: number[]
   ): Promise<Post> {
-    return this.service.createPost(user, body, coordinates)
+    return this.service.create(user, body, coordinates)
   }
 
   @Query(() => Post)
   @Authorized()
   fetchPost(@Ctx('user') user: User, @Arg('id') id: string): Promise<Post> {
     return this.service.fetch(user, id)
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized()
+  flagPost(
+    @Ctx('user') user: User,
+    @Arg('id') id: string,
+    @Arg('reason') reason: string
+  ): Promise<boolean> {
+    return this.service.flag(user, id, reason)
   }
 
   @Mutation(() => Post)

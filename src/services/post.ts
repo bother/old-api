@@ -1,9 +1,17 @@
 import moment from 'moment'
+import { ObjectId } from 'mongodb'
 import { MongooseFilterQuery } from 'mongoose'
 import { Service } from 'typedi'
 
 import { google, helpers } from '../lib'
-import { LikeModel, Post, PostModel, User } from '../models'
+import {
+  LikeModel,
+  Post,
+  PostModel,
+  ReportModel,
+  User,
+  UserModel
+} from '../models'
 
 @Service()
 export class PostService {
@@ -14,6 +22,9 @@ export class PostService {
     after?: string
   ): Promise<Post[]> {
     const query: MongooseFilterQuery<Post> = {
+      _id: {
+        $nin: user.ignored
+      },
       coordinates: {
         $near: {
           $geometry: {
@@ -45,6 +56,9 @@ export class PostService {
 
   async popular(user: User): Promise<Post[]> {
     const posts = await PostModel.find({
+      _id: {
+        $nin: user.ignored
+      },
       createdAt: {
         $gte: moment().subtract(24, 'hours').toDate()
       },
@@ -66,7 +80,11 @@ export class PostService {
   }
 
   async latest(user: User, after?: string): Promise<Post[]> {
-    const query: MongooseFilterQuery<Post> = {}
+    const query: MongooseFilterQuery<Post> = {
+      _id: {
+        $nin: user.ignored
+      }
+    }
 
     if (after) {
       query.createdAt = {
@@ -86,11 +104,7 @@ export class PostService {
     return posts
   }
 
-  async createPost(
-    user: User,
-    body: string,
-    coordinates: number[]
-  ): Promise<Post> {
+  async create(user: User, body: string, coordinates: number[]): Promise<Post> {
     const location = await google.geocode(coordinates)
 
     const post = await PostModel.create({
@@ -112,6 +126,10 @@ export class PostService {
   }
 
   async fetch(user: User, id: string): Promise<Post> {
+    if (user.ignored.includes(ObjectId.createFromHexString(id))) {
+      throw new Error('Post not found')
+    }
+
     const post = await PostModel.findById(id).populate('user')
 
     if (!post) {
@@ -162,6 +180,22 @@ export class PostService {
     post.likes = likes
 
     return post
+  }
+
+  async flag(user: User, post: string, reason: string): Promise<boolean> {
+    await ReportModel.create({
+      post,
+      reason,
+      user
+    })
+
+    await UserModel.findByIdAndUpdate(user, {
+      $push: {
+        ignored: ObjectId.createFromHexString(post)
+      }
+    })
+
+    return true
   }
 
   private async updateLikes(post: string): Promise<number> {
