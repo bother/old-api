@@ -1,6 +1,6 @@
-import { Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 
-import { User } from '../models'
+import { Post, User } from '../models'
 import { UserService } from '../services'
 import { AuthResult } from '../types/graphql'
 
@@ -12,6 +12,18 @@ export class UserResolver {
   @Authorized()
   profile(@Ctx('user') user: User): User {
     return user
+  }
+
+  @Query(() => [Post])
+  @Authorized()
+  posts(
+    @Ctx('user') user: User,
+    @Arg('before', {
+      nullable: true
+    })
+    before?: string
+  ): Promise<Post[]> {
+    return this.service.fetchPosts(user, before)
   }
 
   @Mutation(() => AuthResult)

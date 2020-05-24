@@ -55,6 +55,12 @@ export class Post extends TimeStamps {
 
   @Field(() => Int)
   @prop({
+    default: 1
+  })
+  views!: number
+
+  @Field(() => Int)
+  @prop({
     default: 0
   })
   comments!: number

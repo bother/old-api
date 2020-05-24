@@ -2,12 +2,10 @@ import {
   arrayProp,
   getModelForClass,
   modelOptions,
-  Ref
+  prop
 } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ID, ObjectType } from 'type-graphql'
-
-import { Post } from './post'
 
 @ObjectType()
 @modelOptions({
@@ -19,17 +17,20 @@ export class User extends TimeStamps {
   @Field(() => ID)
   id!: string
 
+  @prop()
+  deviceId!: string
+
+  @Field()
+  @prop({
+    default: 5
+  })
+  rating!: number
+
   @arrayProp({
     default: [],
-    ref: 'Post'
+    items: String
   })
-  ignored!: Ref<Post>[]
-
-  @Field()
-  createdAt!: Date
-
-  @Field()
-  updatedAt!: Date
+  ignored!: string[]
 }
 
 export const UserModel = getModelForClass(User)

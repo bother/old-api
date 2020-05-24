@@ -1,5 +1,4 @@
 import moment from 'moment'
-import { ObjectId } from 'mongodb'
 import { MongooseFilterQuery } from 'mongoose'
 import { Service } from 'typedi'
 
@@ -19,7 +18,7 @@ export class PostService {
     user: User,
     coordinates: number[],
     distance: number,
-    after?: string
+    before?: string
   ): Promise<Post[]> {
     const query: MongooseFilterQuery<Post> = {
       _id: {
@@ -33,12 +32,15 @@ export class PostService {
           },
           $maxDistance: distance * 1000
         }
+      },
+      user: {
+        $nin: user.ignored
       }
     }
 
-    if (after) {
+    if (before) {
       query.createdAt = {
-        $lt: moment(after).toDate()
+        $lt: moment(before).toDate()
       }
     }
 
@@ -64,6 +66,9 @@ export class PostService {
       },
       likes: {
         $gte: 100
+      },
+      user: {
+        $nin: user.ignored
       }
     })
       .sort({
@@ -79,16 +84,19 @@ export class PostService {
     return posts
   }
 
-  async latest(user: User, after?: string): Promise<Post[]> {
+  async latest(user: User, before?: string): Promise<Post[]> {
     const query: MongooseFilterQuery<Post> = {
       _id: {
+        $nin: user.ignored
+      },
+      user: {
         $nin: user.ignored
       }
     }
 
-    if (after) {
+    if (before) {
       query.createdAt = {
-        $lt: moment(after).toDate()
+        $lt: moment(before).toDate()
       }
     }
 
@@ -126,7 +134,7 @@ export class PostService {
   }
 
   async fetch(user: User, id: string): Promise<Post> {
-    if (user.ignored.includes(ObjectId.createFromHexString(id))) {
+    if (user.ignored.includes(id)) {
       throw new Error('Post not found')
     }
 
@@ -142,6 +150,9 @@ export class PostService {
     })
 
     post.liked = !!like
+    post.views = post.views + 1
+
+    await post.save()
 
     return post
   }
@@ -191,7 +202,7 @@ export class PostService {
 
     await UserModel.findByIdAndUpdate(user, {
       $push: {
-        ignored: ObjectId.createFromHexString(post)
+        ignored: post
       }
     })
 
@@ -210,7 +221,7 @@ export class PostService {
     return likes
   }
 
-  private async fetchLikes(user: User, posts: Post[]): Promise<Post[]> {
+  async fetchLikes(user: User, posts: Post[]): Promise<Post[]> {
     const likes = await LikeModel.find({
       post: {
         $in: posts.map(({ id }) => id)
