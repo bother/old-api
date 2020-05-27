@@ -73,8 +73,8 @@ class Google {
       if (city && state && country) {
         return {
           city: city.long_name,
-          country: country.short_name,
-          state: state.short_name
+          country: country.long_name,
+          state: state.long_name
         }
       }
     }

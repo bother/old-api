@@ -1,17 +1,28 @@
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 
 import { Post, User } from '../models'
-import { UserService } from '../services'
-import { AuthResult } from '../types/graphql'
+import { NotificationService, UserService } from '../services'
+import { AuthResult, Profile } from '../types/graphql'
 
 @Resolver()
 export class UserResolver {
-  constructor(private readonly service: UserService) {}
+  constructor(
+    private readonly service: UserService,
+    private readonly notification: NotificationService
+  ) {}
 
-  @Query(() => User)
+  @Query(() => Profile)
   @Authorized()
-  profile(@Ctx('user') user: User): User {
-    return user
+  async profile(@Ctx('user') user: User): Promise<Profile> {
+    const { id, rating } = user
+
+    const notifications = await this.notification.count(user)
+
+    return {
+      id,
+      notifications,
+      rating
+    }
   }
 
   @Query(() => [Post])
