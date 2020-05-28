@@ -15,7 +15,7 @@ export class NotificationService {
     const notifications = await NotificationModel.find({
       user
     }).sort({
-      createdAt: -1
+      updatedAt: -1
     })
 
     return notifications

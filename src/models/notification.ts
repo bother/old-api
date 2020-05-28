@@ -19,7 +19,7 @@ import { User } from './user'
 @index({
   user: 1,
   // eslint-disable-next-line sort-keys-fix/sort-keys-fix
-  createdAt: 1
+  updatedAt: 1
 })
 @index({
   user: 1,
