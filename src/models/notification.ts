@@ -34,7 +34,13 @@ export class Notification extends TimeStamps {
   @prop({
     required: true
   })
-  action!: 'comment'
+  action!: string
+
+  @Field()
+  @prop({
+    required: true
+  })
+  actor!: string
 
   @Field()
   @prop({

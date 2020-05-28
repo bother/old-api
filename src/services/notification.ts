@@ -35,7 +35,7 @@ export class NotificationService {
     return true
   }
 
-  async comment(post: Post): Promise<void> {
+  async comment(user: User, post: Post): Promise<void> {
     await NotificationModel.findOneAndUpdate(
       {
         action: 'comment',
@@ -44,6 +44,7 @@ export class NotificationService {
         user: post.user
       },
       {
+        actor: user.id,
         unread: true
       },
       {

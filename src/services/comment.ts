@@ -35,7 +35,7 @@ export class CommentService {
     })
 
     if (!helpers.equals(user.id, post.user)) {
-      this.notification.comment(post)
+      this.notification.comment(user, post)
     }
 
     return comment
