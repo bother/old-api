@@ -1,15 +1,18 @@
-import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { Args, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { Inject } from 'typedi'
 
 import { Post, User } from '../models'
 import { NotificationService, UserService } from '../services'
+import { PostsArgs, SignUpArgs } from '../types/args'
 import { AuthResult, Profile } from '../types/graphql'
 
 @Resolver()
 export class UserResolver {
-  constructor(
-    private readonly service: UserService,
-    private readonly notification: NotificationService
-  ) {}
+  @Inject()
+  service!: UserService
+
+  @Inject()
+  notification!: NotificationService
 
   @Query(() => Profile)
   @Authorized()
@@ -29,16 +32,13 @@ export class UserResolver {
   @Authorized()
   posts(
     @Ctx('user') user: User,
-    @Arg('before', {
-      nullable: true
-    })
-    before?: string
+    @Args() { before }: PostsArgs
   ): Promise<Post[]> {
     return this.service.fetchPosts(user, before)
   }
 
   @Mutation(() => AuthResult)
-  signUp(): Promise<AuthResult> {
-    return this.service.signUp()
+  signUp(@Args() data: SignUpArgs): Promise<AuthResult> {
+    return this.service.signUp(data)
   }
 }

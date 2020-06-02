@@ -1,6 +1,7 @@
 import {
   arrayProp,
   getModelForClass,
+  index,
   modelOptions,
   prop
 } from '@typegoose/typegoose'
@@ -13,6 +14,14 @@ import { Field, ID, ObjectType } from 'type-graphql'
     timestamps: true
   }
 })
+@index(
+  {
+    deviceId: 1
+  },
+  {
+    unique: true
+  }
+)
 export class User extends TimeStamps {
   @Field(() => ID)
   id!: string
@@ -31,6 +40,9 @@ export class User extends TimeStamps {
     items: String
   })
   ignored!: string[]
+
+  @prop()
+  pushToken?: string
 }
 
 export const UserModel = getModelForClass(User)

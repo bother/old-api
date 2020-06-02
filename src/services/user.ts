@@ -4,6 +4,7 @@ import { Inject, Service } from 'typedi'
 
 import { auth } from '../lib'
 import { Post, PostModel, User, UserModel } from '../models'
+import { SignUpArgs } from '../types/args'
 import { AuthResult } from '../types/graphql'
 import { PostService } from './post'
 
@@ -12,8 +13,11 @@ export class UserService {
   @Inject()
   posts!: PostService
 
-  async signUp(): Promise<AuthResult> {
-    const user = await UserModel.create({})
+  async signUp({ deviceId, pushToken }: SignUpArgs): Promise<AuthResult> {
+    const user = await UserModel.create({
+      deviceId,
+      pushToken
+    })
 
     const token = auth.createToken(user)
 
