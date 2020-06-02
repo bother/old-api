@@ -1,6 +1,14 @@
+import { Ref } from '@typegoose/typegoose'
 import { Service } from 'typedi'
 
-import { Notification, NotificationModel, Post, User } from '../models'
+import { firebase } from '../lib'
+import {
+  Notification,
+  NotificationModel,
+  Post,
+  User,
+  UserModel
+} from '../models'
 
 @Service()
 export class NotificationService {
@@ -52,6 +60,38 @@ export class NotificationService {
       }
     )
 
-    // push
+    await this.notify(post.user, 'comment', post.id)
+  }
+
+  private async notify(
+    userId: Ref<User>,
+    action: string,
+    id: string
+  ): Promise<void> {
+    const user = await UserModel.findById(userId).select('pushToken')
+
+    if (!user || !user.pushToken) {
+      return
+    }
+
+    const title = action === 'comment' ? 'New comment' : '¯_(ツ)_/¯'
+
+    const body =
+      action === 'comment' ? 'Someone commented on your post.' : '¯_(ツ)_/¯'
+
+    const deeplink = `bother://${
+      action === 'comment' ? 'post' : 'unknown'
+    }/${id}`
+
+    await firebase.messaging().send({
+      data: {
+        deeplink
+      },
+      notification: {
+        body,
+        title
+      },
+      token: user.pushToken
+    })
   }
 }
