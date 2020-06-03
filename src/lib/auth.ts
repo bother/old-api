@@ -6,20 +6,28 @@ import { sign, verify } from 'jsonwebtoken'
 import { AuthChecker } from 'type-graphql'
 
 import { User, UserModel } from '../models'
-import { AuthToken, Context } from '../types'
+import { AuthToken, Context, Tokens } from '../types'
+import { firebase } from './firebase'
 
 export const authChecker: AuthChecker<Context, number> = async ({
   context: { user }
 }): Promise<boolean> => !!user
 
 class Auth {
-  createToken(user: User): string {
-    return sign(
+  async createToken(user: User): Promise<Tokens> {
+    const token = sign(
       {
         id: user.id
       },
       TOKEN_SECRET
     )
+
+    const firebaseToken = await firebase.auth().createCustomToken(user.id)
+
+    return {
+      firebaseToken,
+      token
+    }
   }
 
   async getUser(request: FastifyRequest): Promise<User | undefined> {

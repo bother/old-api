@@ -4,6 +4,11 @@ export type AuthToken = {
   id: string
 }
 
+export type Tokens = {
+  firebaseToken: string
+  token: string
+}
+
 export type Context = {
   user?: User
 }

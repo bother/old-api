@@ -1,4 +1,5 @@
 export { CommentService } from './comment'
 export { NotificationService } from './notification'
 export { PostService } from './post'
+export { ThreadService } from './thread'
 export { UserService } from './user'

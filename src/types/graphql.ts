@@ -6,6 +6,9 @@ import { User } from '../models'
 @ObjectType()
 export class AuthResult {
   @Field()
+  firebaseToken!: string
+
+  @Field()
   token!: string
 
   @Field(() => User)
