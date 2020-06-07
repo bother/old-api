@@ -14,6 +14,19 @@ export class UserService {
   posts!: PostService
 
   async signUp({ deviceId, pushToken }: SignUpArgs): Promise<AuthResult> {
+    const exists = await UserModel.findOne({
+      deviceId
+    })
+
+    if (exists) {
+      const token = auth.createToken(exists)
+
+      return {
+        token,
+        user: exists
+      }
+    }
+
     const user = await UserModel.create({
       deviceId,
       pushToken
