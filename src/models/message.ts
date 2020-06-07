@@ -8,8 +8,7 @@ import {
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ID, ObjectType } from 'type-graphql'
 
-import { Message } from './message'
-import { Post } from './post'
+import { Thread } from './thread'
 import { User } from './user'
 
 @ObjectType()
@@ -19,50 +18,32 @@ import { User } from './user'
   }
 })
 @index({
-  sender: 1,
-  updatedAt: -1
+  thread: 1,
+  // eslint-disable-next-line sort-keys-fix/sort-keys-fix
+  createdAt: -1
 })
-@index({
-  receiver: 1,
-  updatedAt: -1
-})
-export class Thread extends TimeStamps {
+export class Message extends TimeStamps {
   @Field(() => ID)
   id!: string
 
-  @Field(() => Message)
-  @prop({
-    ref: 'Message'
-  })
-  last!: Ref<Message>
-
-  @Field(() => Post)
-  @prop({
-    ref: 'Post',
-    required: true
-  })
-  post!: Ref<Post>
-
-  @Field(() => User)
-  @prop({
-    ref: 'User',
-    required: true
-  })
-  sender!: Ref<User>
-
-  @Field(() => User)
-  @prop({
-    ref: 'User',
-    required: true
-  })
-  receiver!: Ref<User>
-
   @Field()
   @prop({
-    default: false,
-    type: Boolean
+    required: true
   })
-  ended!: boolean
+  body!: string
+
+  @Field(() => User)
+  @prop({
+    ref: 'User',
+    required: true
+  })
+  user!: Ref<User>
+
+  @prop({
+    ref: 'Thread',
+    required: true
+  })
+  thread!: Ref<Thread>
 
   @Field()
   createdAt!: Date
@@ -71,4 +52,4 @@ export class Thread extends TimeStamps {
   updatedAt!: Date
 }
 
-export const ThreadModel = getModelForClass(Thread)
+export const MessageModel = getModelForClass(Message)

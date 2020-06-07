@@ -39,3 +39,18 @@ export class FindThreadArgs {
   @Field()
   postId!: string
 }
+
+@ArgsType()
+export class FetchMessagesArgs {
+  @Field()
+  threadId!: string
+}
+
+@ArgsType()
+export class SendMessageArgs {
+  @Field()
+  threadId!: string
+
+  @Field()
+  body!: string
+}

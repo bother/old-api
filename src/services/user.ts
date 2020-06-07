@@ -19,10 +19,9 @@ export class UserService {
       pushToken
     })
 
-    const { firebaseToken, token } = await auth.createToken(user)
+    const token = auth.createToken(user)
 
     return {
-      firebaseToken,
       token,
       user
     }

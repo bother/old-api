@@ -11,6 +11,7 @@ connect(MONGO_URI, {
 
 export { Comment, CommentModel } from './comment'
 export { Like, LikeModel } from './like'
+export { Message, MessageModel } from './message'
 export { Notification, NotificationModel } from './notification'
 export { Post, PostModel } from './post'
 export { Report, ReportModel } from './report'

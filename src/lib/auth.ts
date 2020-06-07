@@ -1,37 +1,30 @@
 const { TOKEN_SECRET } = process.env
 
 import { AuthenticationError } from 'apollo-server-fastify'
-import { FastifyRequest } from 'fastify'
 import { sign, verify } from 'jsonwebtoken'
 import { AuthChecker } from 'type-graphql'
 
 import { User, UserModel } from '../models'
-import { AuthToken, Context, Tokens } from '../types'
-import { firebase } from './firebase'
+import { AuthToken, Context, RequestWithContext } from '../types'
 
 export const authChecker: AuthChecker<Context, number> = async ({
   context: { user }
 }): Promise<boolean> => !!user
 
 class Auth {
-  async createToken(user: User): Promise<Tokens> {
-    const token = sign(
+  createToken(user: User): string {
+    return sign(
       {
         id: user.id
       },
       TOKEN_SECRET
     )
-
-    const firebaseToken = await firebase.auth().createCustomToken(user.id)
-
-    return {
-      firebaseToken,
-      token
-    }
   }
 
-  async getUser(request: FastifyRequest): Promise<User | undefined> {
-    const authorization = request.headers.authorization
+  async getUser(request: RequestWithContext): Promise<User | undefined> {
+    const authorization = request.connection
+      ? request.connection.context.Authorization
+      : request.headers.authorization
 
     if (!authorization) {
       return

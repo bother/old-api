@@ -1,13 +1,22 @@
+import { DocumentType, isDocument } from '@typegoose/typegoose'
 import moment from 'moment'
 import { Service } from 'typedi'
 
-import { firebase } from '../lib'
-import { PostModel, Thread, ThreadModel, User } from '../models'
+import { helpers } from '../lib'
+import {
+  Message,
+  MessageModel,
+  PostModel,
+  Thread,
+  ThreadModel,
+  User
+} from '../models'
+import { SerializedMessage } from '../types'
 
 @Service()
 export class ThreadService {
   async fetch(user: User): Promise<Thread[]> {
-    return ThreadModel.find({
+    const threads = await ThreadModel.find({
       $or: [
         {
           receiver: user
@@ -20,9 +29,12 @@ export class ThreadService {
       .sort({
         updatedAt: -1
       })
+      .populate('last')
       .populate('post')
-      .populate('sender')
       .populate('receiver')
+      .populate('sender')
+
+    return threads
   }
 
   async fetchOne(user: User, id: string): Promise<Thread> {
@@ -37,9 +49,10 @@ export class ThreadService {
       ],
       _id: id
     })
+      .populate('last')
       .populate('post')
-      .populate('sender')
       .populate('receiver')
+      .populate('sender')
 
     if (!thread) {
       throw new Error('Thread not found')
@@ -50,12 +63,20 @@ export class ThreadService {
 
   async findOne(user: User, postId: string): Promise<Thread> {
     const thread = await ThreadModel.findOne({
-      post: postId,
-      sender: user
+      $or: [
+        {
+          receiver: user
+        },
+        {
+          sender: user
+        }
+      ],
+      post: postId
     })
+      .populate('last')
       .populate('post')
-      .populate('sender')
       .populate('receiver')
+      .populate('sender')
 
     if (!thread) {
       throw new Error('Thread not found')
@@ -71,35 +92,128 @@ export class ThreadService {
       throw new Error('Post not found')
     }
 
-    const thread = await ThreadModel.findOneAndUpdate(
-      {
-        post,
-        receiver: post.user,
-        sender: user
-      },
-      {
-        last: body
-      },
-      {
-        new: true,
-        upsert: true
-      }
-    )
-      .populate('post')
-      .populate('sender')
-      .populate('receiver')
+    const thread = await ThreadModel.create({
+      post,
+      receiver: post.user,
+      sender: user
+    })
 
-    await firebase
-      .firestore()
-      .collection('messages')
-      .add({
-        body,
-        createdAt: moment().toDate(),
-        receiver: String(post.user),
-        sender: user.id,
-        thread: thread.id
-      })
+    const message = await MessageModel.create({
+      body,
+      thread,
+      user
+    })
+
+    thread.last = message
+
+    await thread.save()
+
+    await thread.populate('receiver').execPopulate()
 
     return thread
+  }
+
+  async end(user: User, id: string): Promise<boolean> {
+    const thread = await ThreadModel.findById(id)
+
+    if (!thread) {
+      throw new Error('Thread not found')
+    }
+
+    if (
+      !helpers.equals(user.id, thread.sender) &&
+      !helpers.equals(user.id, thread.receiver)
+    ) {
+      throw new Error('Not your thread')
+    }
+
+    thread.ended = true
+
+    await thread.save()
+
+    return true
+  }
+
+  async messages(user: User, id: string): Promise<Message[]> {
+    const thread = await this.checkThread(user, id)
+
+    const messages = await MessageModel.find({
+      thread
+    })
+      .populate('user')
+      .sort({
+        createdAt: -1
+      })
+
+    return messages
+  }
+
+  async send(
+    user: User,
+    id: string,
+    body: string
+  ): Promise<DocumentType<Message>> {
+    const thread = await this.checkThread(user, id)
+
+    if (thread.ended) {
+      throw new Error('This conversation is over')
+    }
+
+    const message = await MessageModel.create({
+      body,
+      thread,
+      user
+    })
+
+    thread.last = message
+
+    thread.save()
+
+    return message
+  }
+
+  private async checkThread(
+    user: User,
+    id: string
+  ): Promise<DocumentType<Thread>> {
+    const thread = await ThreadModel.findById(id)
+
+    if (!thread) {
+      throw new Error('Thread not found')
+    }
+
+    if (
+      !helpers.equals(user.id, thread.sender) &&
+      !helpers.equals(user.id, thread.receiver)
+    ) {
+      throw new Error('Not your thread')
+    }
+
+    return thread
+  }
+
+  serializeMessage(message: Message): SerializedMessage {
+    return {
+      body: message.body,
+      createdAt: message.createdAt.toISOString(),
+      id: message.id,
+      thread: {
+        id: isDocument(message.thread) ? message.thread.id : null
+      },
+      user: {
+        id: isDocument(message.user) ? message.user.id : null
+      }
+    }
+  }
+
+  deserializeMessage(message: SerializedMessage): Omit<Message, User['id']> {
+    return {
+      body: message.body,
+      createdAt: moment(message.createdAt).toDate(),
+      id: message.id,
+      user: {
+        id: message.user.id
+      }
+    }
   }
 }
