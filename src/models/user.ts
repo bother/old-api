@@ -1,5 +1,4 @@
 import {
-  arrayProp,
   getModelForClass,
   index,
   modelOptions,
@@ -26,7 +25,9 @@ export class User extends TimeStamps {
   @Field(() => ID)
   id!: string
 
-  @prop()
+  @prop({
+    select: false
+  })
   deviceId!: string
 
   @Field()
@@ -35,13 +36,15 @@ export class User extends TimeStamps {
   })
   rating!: number
 
-  @arrayProp({
+  @prop({
     default: [],
     items: String
   })
   ignored!: string[]
 
-  @prop()
+  @prop({
+    select: false
+  })
   pushToken?: string
 }
 

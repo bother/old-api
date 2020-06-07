@@ -1,6 +1,6 @@
 import { DocumentType, isDocument } from '@typegoose/typegoose'
 import moment from 'moment'
-import { Service } from 'typedi'
+import { Inject, Service } from 'typedi'
 
 import { helpers } from '../lib'
 import {
@@ -12,9 +12,13 @@ import {
   User
 } from '../models'
 import { SerializedMessage } from '../types'
+import { NotificationService } from './notification'
 
 @Service()
 export class ThreadService {
+  @Inject()
+  notification!: NotificationService
+
   async fetch(user: User): Promise<Thread[]> {
     const threads = await ThreadModel.find({
       $or: [
@@ -29,7 +33,10 @@ export class ThreadService {
       .sort({
         updatedAt: -1
       })
-      .populate('last')
+      .populate({
+        path: 'last',
+        populate: 'user'
+      })
       .populate('post')
       .populate('receiver')
       .populate('sender')
@@ -49,7 +56,10 @@ export class ThreadService {
       ],
       _id: id
     })
-      .populate('last')
+      .populate({
+        path: 'last',
+        populate: 'user'
+      })
       .populate('post')
       .populate('receiver')
       .populate('sender')
@@ -73,7 +83,10 @@ export class ThreadService {
       ],
       post: postId
     })
-      .populate('last')
+      .populate({
+        path: 'last',
+        populate: 'user'
+      })
       .populate('post')
       .populate('receiver')
       .populate('sender')
@@ -168,6 +181,8 @@ export class ThreadService {
     thread.last = message
 
     thread.save()
+
+    this.notification.message(user, thread)
 
     return message
   }

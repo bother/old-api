@@ -1,11 +1,12 @@
 import { Ref } from '@typegoose/typegoose'
 import { Service } from 'typedi'
 
-import { firebase } from '../lib'
+import { firebase, helpers } from '../lib'
 import {
   Notification,
   NotificationModel,
   Post,
+  Thread,
   User,
   UserModel
 } from '../models'
@@ -63,6 +64,30 @@ export class NotificationService {
     await this.notify(post.user, 'comment', post.id)
   }
 
+  async message(user: User, thread: Thread): Promise<void> {
+    const receiver = helpers.equals(user.id, thread.receiver)
+      ? thread.sender
+      : thread.receiver
+
+    await NotificationModel.findOneAndUpdate(
+      {
+        action: 'message',
+        targetId: thread.id,
+        targetType: 'thread',
+        user: receiver
+      },
+      {
+        actor: user.id,
+        unread: true
+      },
+      {
+        upsert: true
+      }
+    )
+
+    await this.notify(receiver, 'message', thread.id)
+  }
+
   private async notify(
     userId: Ref<User>,
     action: string,
@@ -74,13 +99,26 @@ export class NotificationService {
       return
     }
 
-    const title = action === 'comment' ? 'New comment' : '¯_(ツ)_/¯'
+    const title =
+      action === 'comment'
+        ? 'New comment'
+        : action === 'message'
+        ? 'New message'
+        : '¯_(ツ)_/¯'
 
     const body =
-      action === 'comment' ? 'Someone commented on your post.' : '¯_(ツ)_/¯'
+      action === 'comment'
+        ? 'Someone commented on your post.'
+        : action === 'message'
+        ? 'Someone sent you a message.'
+        : '¯_(ツ)_/¯'
 
     const deeplink = `bother://${
-      action === 'comment' ? 'post' : 'unknown'
+      action === 'comment'
+        ? 'post'
+        : action === 'message'
+        ? 'thread'
+        : 'unknown'
     }/${id}`
 
     await firebase.messaging().send({
