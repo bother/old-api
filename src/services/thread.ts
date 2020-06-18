@@ -121,6 +121,8 @@ export class ThreadService {
 
     await thread.save()
 
+    this.notification.message(user, thread)
+
     await thread.populate('receiver').execPopulate()
 
     return thread
