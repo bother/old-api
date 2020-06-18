@@ -12,9 +12,10 @@ import {
 import { Inject } from 'typedi'
 
 import { pubsub } from '..'
+import { helpers } from '../lib'
 import { Message, Thread, User } from '../models'
 import { ThreadService } from '../services'
-import { SerializedMessage } from '../types'
+import { Context, SerializedMessage, SerializedThread } from '../types'
 import {
   CreateThreadArgs,
   FetchMessagesArgs,
@@ -85,10 +86,18 @@ export class ThreadResolver {
     @Ctx('user') user: User,
     @Args() { body, threadId }: SendMessageArgs
   ): Promise<Message> {
-    const message = await this.service.send(user, threadId, body)
+    const { message, thread } = await this.service.send(user, threadId, body)
 
     await pubsub.publish(`NEW_MESSAGE.${threadId}`, {
       message: this.service.serializeMessage(message)
+    })
+
+    const receiver = helpers.equals(user.id, thread.sender)
+      ? thread.receiver
+      : thread.sender
+
+    await pubsub.publish(`THREAD_UPDATED.${receiver}`, {
+      thread: this.service.serializeThread(thread)
     })
 
     return message
@@ -105,6 +114,27 @@ export class ThreadResolver {
     @Args() args: FetchMessagesArgs,
     @Root('message') message: SerializedMessage
   ): Message {
-    return this.service.deserializeMessage(message) as Message
+    return (this.service.deserializeMessage(message) as unknown) as Message
+  }
+
+  @Subscription(() => Thread, {
+    subscribe: withFilter(
+      (root, args, { user }: Context) =>
+        pubsub.asyncIterator(`THREAD_UPDATED.${user?.id}`),
+      (payload, variables, { user }: Context) => {
+        if (!user) {
+          return false
+        }
+
+        return (
+          helpers.equals(user.id, payload.thread.receiver.id) ||
+          helpers.equals(user.id, payload.thread.sender.id)
+        )
+      }
+    )
+  })
+  @Authorized()
+  threadUpdated(@Root('thread') thread: SerializedThread): Thread {
+    return (this.service.deserializeThread(thread) as unknown) as Thread
   }
 }

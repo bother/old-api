@@ -27,6 +27,23 @@ export type SerializedMessage = {
   }
 }
 
+export type SerializedThread = {
+  createdAt: string
+  ended: boolean
+  id: string
+  last: SerializedMessage
+  post: {
+    id: string
+  }
+  receiver: {
+    id: string
+  }
+  sender: {
+    id: string
+  }
+  updatedAt: string
+}
+
 export interface RequestWithContext extends FastifyRequest {
   connection: {
     context: {
