@@ -115,20 +115,24 @@ export class PostService {
   async create(user: User, body: string, coordinates: number[]): Promise<Post> {
     const location = await google.geocode(coordinates)
 
-    const post = await PostModel.create({
-      body,
-      coordinates: {
-        coordinates,
-        type: 'Point'
-      },
-      location,
-      user
-    })
+    const post = new PostModel()
 
-    await LikeModel.create({
-      post,
-      user
-    })
+    post.body = body
+    post.coordinates = {
+      coordinates,
+      type: 'Point'
+    }
+    post.location = location
+    post.user = user
+
+    await post.save()
+
+    const like = new LikeModel()
+
+    like.post = post
+    like.user = user
+
+    await like.save()
 
     return post
   }
@@ -180,10 +184,12 @@ export class PostService {
       return post
     }
 
-    await LikeModel.create({
-      post,
-      user
-    })
+    const nextLike = new LikeModel()
+
+    nextLike.post = post
+    nextLike.user = user
+
+    await nextLike.save()
 
     const likes = await this.updateLikes(id)
 
@@ -193,16 +199,24 @@ export class PostService {
     return post
   }
 
-  async flag(user: User, post: string, reason: string): Promise<boolean> {
-    await ReportModel.create({
-      post,
-      reason,
-      user
-    })
+  async flag(user: User, id: string, reason: string): Promise<boolean> {
+    const post = await PostModel.findById(id)
+
+    if (!post) {
+      throw new Error('Post not found')
+    }
+
+    const report = new ReportModel()
+
+    report.post = post
+    report.reason = reason
+    report.user = user
+
+    await report.save()
 
     await UserModel.findByIdAndUpdate(user, {
       $push: {
-        ignored: post
+        ignored: id
       }
     })
 

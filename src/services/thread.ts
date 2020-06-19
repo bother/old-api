@@ -105,17 +105,21 @@ export class ThreadService {
       throw new Error('Post not found')
     }
 
-    const thread = await ThreadModel.create({
-      post,
-      receiver: post.user,
-      sender: user
-    })
+    const thread = new ThreadModel()
 
-    const message = await MessageModel.create({
-      body,
-      thread,
-      user
-    })
+    thread.post = post
+    thread.receiver = post.user
+    thread.sender = user
+
+    await thread.save()
+
+    const message = new MessageModel()
+
+    message.body = body
+    message.thread = thread
+    message.user = user
+
+    await message.save()
 
     thread.last = message
 
@@ -177,11 +181,13 @@ export class ThreadService {
       throw new Error('This conversation is over')
     }
 
-    const message = await MessageModel.create({
-      body,
-      thread,
-      user
-    })
+    const message = new MessageModel()
+
+    message.body = body
+    message.thread = thread
+    message.user = user
+
+    await message.save()
 
     thread.last = message
 

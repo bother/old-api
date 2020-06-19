@@ -27,10 +27,12 @@ export class UserService {
       }
     }
 
-    const user = await UserModel.create({
-      deviceId,
-      pushToken
-    })
+    const user = new UserModel()
+
+    user.deviceId = deviceId
+    user.pushToken = pushToken
+
+    await user.save()
 
     const token = auth.createToken(user)
 

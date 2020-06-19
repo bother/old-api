@@ -38,7 +38,7 @@ export class User extends TimeStamps {
 
   @prop({
     default: [],
-    items: String
+    type: String
   })
   ignored!: string[]
 

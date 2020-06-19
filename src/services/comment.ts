@@ -22,11 +22,13 @@ export class CommentService {
       throw new Error('Post not found')
     }
 
-    const comment = await CommentModel.create({
-      body,
-      post,
-      user
-    })
+    const comment = new CommentModel()
+
+    comment.body = body
+    comment.post = post
+    comment.user = user
+
+    await comment.save()
 
     await PostModel.findByIdAndUpdate(postId, {
       $inc: {
