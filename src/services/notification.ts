@@ -64,6 +64,26 @@ export class NotificationService {
     await this.notify(post.user, 'comment', post.id)
   }
 
+  async like(user: User, post: Post): Promise<void> {
+    await NotificationModel.findOneAndUpdate(
+      {
+        action: 'like',
+        targetId: post.id,
+        targetType: 'post',
+        user: post.user
+      },
+      {
+        actor: user.id,
+        unread: true
+      },
+      {
+        upsert: true
+      }
+    )
+
+    await this.notify(post.user, 'like', post.id)
+  }
+
   async message(user: User, thread: Thread): Promise<void> {
     const receiver = helpers.equals(user.id, thread.receiver)
       ? thread.sender

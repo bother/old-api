@@ -1,6 +1,6 @@
 import moment from 'moment'
 import { MongooseFilterQuery } from 'mongoose'
-import { Service } from 'typedi'
+import { Inject, Service } from 'typedi'
 
 import { google, helpers } from '../lib'
 import {
@@ -11,9 +11,13 @@ import {
   User,
   UserModel
 } from '../models'
+import { NotificationService } from './notification'
 
 @Service()
 export class PostService {
+  @Inject()
+  notification!: NotificationService
+
   async nearby(
     user: User,
     coordinates: number[],
@@ -195,6 +199,10 @@ export class PostService {
 
     post.liked = true
     post.likes = likes
+
+    if (!helpers.equals(user.id, post.user)) {
+      this.notification.like(user, post)
+    }
 
     return post
   }
