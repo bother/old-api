@@ -10,8 +10,10 @@
   "scripts": {
     "build": "tsc",
     "dev": "env-cmd ts-node-dev --ignore-watch node_modules --respawn --no-notify src/index.ts",
+    "dev:max": "env-cmd ts-node-dev --ignore-watch node_modules --no-notify --transpile-only --max-old-space-size=20000",
     "lint": "eslint src --ext ts",
-    "seed": "env-cmd ts-node-dev --ignore-watch node_modules --no-notify --transpile-only --max-old-space-size=20000 seed/index.ts",
+    "seed": "yarn dev:max seed/index.ts",
+    "seed:demo": "yarn dev:max seed/demo.ts",
     "start": "node dist/index.js"
   },
   "dependencies": {
