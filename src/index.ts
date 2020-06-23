@@ -34,6 +34,10 @@ const main = async (): Promise<void> => {
   server.register(apollo.createHandler())
   apollo.installSubscriptionHandlers(server.server)
 
+  server.get('/', (request, reply) => {
+    reply.redirect('https://bother.app')
+  })
+
   await server.listen(Number(PORT), '0.0.0.0')
 
   console.log(`Running on ${PORT}`)
