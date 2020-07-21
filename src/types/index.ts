@@ -1,5 +1,3 @@
-import { FastifyRequest } from 'fastify'
-
 import { User } from '../models'
 
 export type AuthToken = {
@@ -42,12 +40,4 @@ export type SerializedThread = {
     id: string
   }
   updatedAt: string
-}
-
-export interface RequestWithContext extends FastifyRequest {
-  connection: {
-    context: {
-      Authorization?: string
-    }
-  }
 }

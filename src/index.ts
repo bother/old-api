@@ -1,4 +1,4 @@
-const { PORT } = process.env
+const { NODE_ENV, PORT } = process.env
 
 import 'reflect-metadata'
 
@@ -9,12 +9,12 @@ import { Container } from 'typedi'
 
 import { auth, authChecker } from './lib'
 import { resolvers } from './resolvers'
-import { Context, RequestWithContext } from './types'
+import { Context } from './types'
 
 export const pubsub = new PubSub()
 
 const main = async (): Promise<void> => {
-  const server = fastify()
+  const api = fastify()
 
   const schema = await buildSchema({
     authChecker,
@@ -25,20 +25,22 @@ const main = async (): Promise<void> => {
   })
 
   const apollo = new ApolloServer({
-    context: async (request: RequestWithContext): Promise<Context> => ({
-      user: await auth.getUser(request)
+    context: async ({ connection, request }): Promise<Context> => ({
+      user: await auth.getUser(connection || request)
     }),
+    introspection: NODE_ENV === 'development',
+    playground: NODE_ENV === 'development',
     schema
   })
 
-  server.register(apollo.createHandler())
-  apollo.installSubscriptionHandlers(server.server)
+  api.register(apollo.createHandler())
+  apollo.installSubscriptionHandlers(api.server)
 
-  server.get('/', (request, reply) => {
+  api.get('/', (request, reply) => {
     reply.redirect('https://bother.app')
   })
 
-  await server.listen(Number(PORT), '0.0.0.0')
+  await api.listen(Number(PORT), '0.0.0.0')
 
   console.log(`Running on ${PORT}`)
 }

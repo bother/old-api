@@ -1,11 +1,13 @@
 const { TOKEN_SECRET } = process.env
 
 import { AuthenticationError } from 'apollo-server-fastify'
+import { FastifyRequest } from 'fastify'
 import { sign, verify } from 'jsonwebtoken'
+import { get } from 'lodash'
 import { AuthChecker } from 'type-graphql'
 
 import { User, UserModel } from '../models'
-import { AuthToken, Context, RequestWithContext } from '../types'
+import { AuthToken, Context } from '../types'
 
 export const authChecker: AuthChecker<Context, number> = async ({
   context: { user }
@@ -21,10 +23,10 @@ class Auth {
     )
   }
 
-  async getUser(request: RequestWithContext): Promise<User | undefined> {
-    const authorization = request.connection
-      ? request.connection.context.Authorization
-      : request.headers.authorization
+  async getUser(request: FastifyRequest): Promise<User | undefined> {
+    const authorization =
+      get(request, 'context.Authorization') ||
+      get(request, 'headers.authorization')
 
     if (!authorization) {
       return

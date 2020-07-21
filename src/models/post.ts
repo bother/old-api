@@ -3,7 +3,8 @@ import {
   index,
   modelOptions,
   prop,
-  Ref
+  Ref,
+  Severity
 } from '@typegoose/typegoose'
 import { TimeStamps } from '@typegoose/typegoose/lib/defaultClasses'
 import { Field, ID, Int, ObjectType } from 'type-graphql'
@@ -14,6 +15,9 @@ import { User } from './user'
 
 @ObjectType()
 @modelOptions({
+  options: {
+    allowMixed: Severity.ALLOW
+  },
   schemaOptions: {
     timestamps: true
   }
