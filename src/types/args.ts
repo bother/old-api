@@ -35,6 +35,15 @@ export class FetchThreadArgs {
 }
 
 @ArgsType()
+export class EndThreadArgs {
+  @Field()
+  id!: string
+
+  @Field()
+  block!: boolean
+}
+
+@ArgsType()
 export class FindThreadArgs {
   @Field()
   postId!: string

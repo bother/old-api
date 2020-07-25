@@ -9,7 +9,8 @@ import {
   PostModel,
   Thread,
   ThreadModel,
-  User
+  User,
+  UserModel
 } from '../models'
 import { SerializedMessage, SerializedThread } from '../types'
 import { NotificationService } from './notification'
@@ -132,7 +133,7 @@ export class ThreadService {
     return thread
   }
 
-  async end(user: User, id: string): Promise<boolean> {
+  async end(user: User, id: string, block: boolean): Promise<boolean> {
     const thread = await ThreadModel.findById(id)
 
     if (!thread) {
@@ -149,6 +150,14 @@ export class ThreadService {
     thread.ended = true
 
     await thread.save()
+
+    if (block) {
+      await UserModel.findByIdAndUpdate(user, {
+        $push: {
+          ignored: id
+        }
+      })
+    }
 
     return true
   }

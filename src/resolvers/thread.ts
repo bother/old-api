@@ -18,6 +18,7 @@ import { ThreadService } from '../services'
 import { Context, SerializedMessage, SerializedThread } from '../types'
 import {
   CreateThreadArgs,
+  EndThreadArgs,
   FetchMessagesArgs,
   FetchThreadArgs,
   FindThreadArgs,
@@ -66,9 +67,9 @@ export class ThreadResolver {
   @Authorized()
   endThread(
     @Ctx('user') user: User,
-    @Args() { id }: FetchThreadArgs
+    @Args() { block, id }: EndThreadArgs
   ): Promise<boolean> {
-    return this.service.end(user, id)
+    return this.service.end(user, id, block)
   }
 
   @Query(() => [Message])
